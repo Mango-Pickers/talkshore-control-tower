@@ -12,7 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminVoyagePrepRouteImport } from './routes/_admin.voyage-prep'
+import { Route as AdminVideosRouteImport } from './routes/_admin.videos'
+import { Route as AdminUsersRouteImport } from './routes/_admin.users'
+import { Route as AdminShoresRouteImport } from './routes/_admin.shores'
+import { Route as AdminSettingsRouteImport } from './routes/_admin.settings'
+import { Route as AdminScenariosRouteImport } from './routes/_admin.scenarios'
+import { Route as AdminReportsRouteImport } from './routes/_admin.reports'
+import { Route as AdminPortsRouteImport } from './routes/_admin.ports'
+import { Route as AdminLanguagesRouteImport } from './routes/_admin.languages'
+import { Route as AdminGuidesRouteImport } from './routes/_admin.guides'
 import { Route as AdminDashboardRouteImport } from './routes/_admin.dashboard'
+import { Route as AdminAnalyticsRouteImport } from './routes/_admin.analytics'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,35 +39,167 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVoyagePrepRoute = AdminVoyagePrepRouteImport.update({
+  id: '/voyage-prep',
+  path: '/voyage-prep',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVideosRoute = AdminVideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminShoresRoute = AdminShoresRouteImport.update({
+  id: '/shores',
+  path: '/shores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminScenariosRoute = AdminScenariosRouteImport.update({
+  id: '/scenarios',
+  path: '/scenarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPortsRoute = AdminPortsRouteImport.update({
+  id: '/ports',
+  path: '/ports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLanguagesRoute = AdminLanguagesRouteImport.update({
+  id: '/languages',
+  path: '/languages',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGuidesRoute = AdminGuidesRouteImport.update({
+  id: '/guides',
+  path: '/guides',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/analytics': typeof AdminAnalyticsRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/guides': typeof AdminGuidesRoute
+  '/languages': typeof AdminLanguagesRoute
+  '/ports': typeof AdminPortsRoute
+  '/reports': typeof AdminReportsRoute
+  '/scenarios': typeof AdminScenariosRoute
+  '/settings': typeof AdminSettingsRoute
+  '/shores': typeof AdminShoresRoute
+  '/users': typeof AdminUsersRoute
+  '/videos': typeof AdminVideosRoute
+  '/voyage-prep': typeof AdminVoyagePrepRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/analytics': typeof AdminAnalyticsRoute
   '/dashboard': typeof AdminDashboardRoute
+  '/guides': typeof AdminGuidesRoute
+  '/languages': typeof AdminLanguagesRoute
+  '/ports': typeof AdminPortsRoute
+  '/reports': typeof AdminReportsRoute
+  '/scenarios': typeof AdminScenariosRoute
+  '/settings': typeof AdminSettingsRoute
+  '/shores': typeof AdminShoresRoute
+  '/users': typeof AdminUsersRoute
+  '/videos': typeof AdminVideosRoute
+  '/voyage-prep': typeof AdminVoyagePrepRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/_admin/analytics': typeof AdminAnalyticsRoute
   '/_admin/dashboard': typeof AdminDashboardRoute
+  '/_admin/guides': typeof AdminGuidesRoute
+  '/_admin/languages': typeof AdminLanguagesRoute
+  '/_admin/ports': typeof AdminPortsRoute
+  '/_admin/reports': typeof AdminReportsRoute
+  '/_admin/scenarios': typeof AdminScenariosRoute
+  '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/shores': typeof AdminShoresRoute
+  '/_admin/users': typeof AdminUsersRoute
+  '/_admin/videos': typeof AdminVideosRoute
+  '/_admin/voyage-prep': typeof AdminVoyagePrepRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/analytics'
+    | '/dashboard'
+    | '/guides'
+    | '/languages'
+    | '/ports'
+    | '/reports'
+    | '/scenarios'
+    | '/settings'
+    | '/shores'
+    | '/users'
+    | '/videos'
+    | '/voyage-prep'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/dashboard'
-  id: '__root__' | '/' | '/_admin' | '/login' | '/_admin/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/analytics'
+    | '/dashboard'
+    | '/guides'
+    | '/languages'
+    | '/ports'
+    | '/reports'
+    | '/scenarios'
+    | '/settings'
+    | '/shores'
+    | '/users'
+    | '/videos'
+    | '/voyage-prep'
+  id:
+    | '__root__'
+    | '/'
+    | '/_admin'
+    | '/login'
+    | '/_admin/analytics'
+    | '/_admin/dashboard'
+    | '/_admin/guides'
+    | '/_admin/languages'
+    | '/_admin/ports'
+    | '/_admin/reports'
+    | '/_admin/scenarios'
+    | '/_admin/settings'
+    | '/_admin/shores'
+    | '/_admin/users'
+    | '/_admin/videos'
+    | '/_admin/voyage-prep'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +231,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/voyage-prep': {
+      id: '/_admin/voyage-prep'
+      path: '/voyage-prep'
+      fullPath: '/voyage-prep'
+      preLoaderRoute: typeof AdminVoyagePrepRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/videos': {
+      id: '/_admin/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof AdminVideosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/users': {
+      id: '/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/shores': {
+      id: '/_admin/shores'
+      path: '/shores'
+      fullPath: '/shores'
+      preLoaderRoute: typeof AdminShoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/settings': {
+      id: '/_admin/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/scenarios': {
+      id: '/_admin/scenarios'
+      path: '/scenarios'
+      fullPath: '/scenarios'
+      preLoaderRoute: typeof AdminScenariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/reports': {
+      id: '/_admin/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/ports': {
+      id: '/_admin/ports'
+      path: '/ports'
+      fullPath: '/ports'
+      preLoaderRoute: typeof AdminPortsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/languages': {
+      id: '/_admin/languages'
+      path: '/languages'
+      fullPath: '/languages'
+      preLoaderRoute: typeof AdminLanguagesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/guides': {
+      id: '/_admin/guides'
+      path: '/guides'
+      fullPath: '/guides'
+      preLoaderRoute: typeof AdminGuidesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/dashboard': {
       id: '/_admin/dashboard'
       path: '/dashboard'
@@ -95,15 +308,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/analytics': {
+      id: '/_admin/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminGuidesRoute: typeof AdminGuidesRoute
+  AdminLanguagesRoute: typeof AdminLanguagesRoute
+  AdminPortsRoute: typeof AdminPortsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminScenariosRoute: typeof AdminScenariosRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminShoresRoute: typeof AdminShoresRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminVideosRoute: typeof AdminVideosRoute
+  AdminVoyagePrepRoute: typeof AdminVoyagePrepRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminGuidesRoute: AdminGuidesRoute,
+  AdminLanguagesRoute: AdminLanguagesRoute,
+  AdminPortsRoute: AdminPortsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminScenariosRoute: AdminScenariosRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminShoresRoute: AdminShoresRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminVideosRoute: AdminVideosRoute,
+  AdminVoyagePrepRoute: AdminVoyagePrepRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
