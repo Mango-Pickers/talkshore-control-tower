@@ -1,96 +1,279 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import {
+  createFileRoute,
+  useNavigate,
+} from "@tanstack/react-router";
+
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+
 import { motion } from "framer-motion";
-import { Anchor, Loader2 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+
+import {
+  Anchor,
+  Loader2,
+} from "lucide-react";
+
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
-});
+import { useAuth } from "@/context/AuthContext";
+
+/* ================= ROUTE ================= */
+
+export const Route =
+  createFileRoute("/login")({
+    component:
+      LoginPage,
+  });
+
+/* ================= PAGE ================= */
 
 function LoginPage() {
-  const { signIn, user } = useAuth();
-  const nav = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    signIn,
+    user,
+    role,
+    loading:
+      authLoading,
+  } = useAuth();
 
-  if (user) {
-    // already authed
-    setTimeout(() => nav({ to: "/dashboard" }), 0);
-  }
+  const navigate =
+    useNavigate();
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
-    if (error) {
-      toast.error(error);
-      return;
+  const [email, setEmail] =
+    useState("");
+
+  const [
+    password,
+    setPassword,
+  ] = useState("");
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+  /* ================= REDIRECT ================= */
+
+  useEffect(() => {
+    if (
+      !authLoading &&
+      user &&
+      (role ===
+        "admin" ||
+        role ===
+          "moderator")
+    ) {
+      navigate({
+        to: "/dashboard",
+      });
     }
-    toast.success("Welcome aboard.");
-    nav({ to: "/dashboard" });
+  }, [
+    authLoading,
+    user,
+    role,
+    navigate,
+  ]);
+
+  /* ================= SUBMIT ================= */
+
+  async function onSubmit(
+    e: FormEvent
+  ) {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const { error } =
+        await signIn(
+          email,
+          password
+        );
+
+      if (error) {
+        toast.error(
+          error
+        );
+
+        return;
+      }
+
+      toast.success(
+        "Welcome Aboard."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
+
+  /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="hidden lg:flex relative overflow-hidden items-center justify-center p-12">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.35_0.1_260)_0%,transparent_50%),radial-gradient(circle_at_70%_80%,oklch(0.4_0.12_220)_0%,transparent_55%)]" />
+    <div className="min-h-screen bg-[#06152D] grid lg:grid-cols-2">
+      {/* ================= LEFT PANEL ================= */}
+
+      <div className="hidden lg:flex relative overflow-hidden items-center justify-center p-14">
+        {/* BACKGROUND */}
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(232,165,72,0.10)_0%,transparent_40%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.14)_0%,transparent_50%)]" />
+
+        {/* CONTENT */}
+
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 max-w-md"
+          initial={{
+            opacity: 0,
+            y: 30,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.8,
+          }}
+          className="relative z-10 max-w-xl"
         >
-          <div className="size-14 rounded-2xl grid place-items-center bg-gradient-to-br from-gold to-gold-hover mb-8 shadow-2xl">
-            <Anchor className="size-7 text-[oklch(0.18_0.04_255)]" />
+          {/* ICON */}
+
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#E8A548] to-[#F2B357] flex items-center justify-center shadow-2xl mb-10">
+            <Anchor className="w-8 h-8 text-[#06152D]" />
           </div>
-          <h1 className="font-display text-5xl leading-tight mb-4">
-            The bridge of <span className="ts-gold-text italic">TalkShore</span>
+
+          {/* HEADING */}
+
+          <h1 className="font-serif text-6xl leading-tight text-[#F5EFE6] mb-6">
+            The bridge of{" "}
+            <span className="italic text-[#E8A548]">
+              TalkShore
+            </span>
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Mission control for a luxury language voyage platform. Pilot guides, ports, and live
-            shores from a single immersive command center.
+
+          {/* DESCRIPTION */}
+
+          <p className="text-[#8FA7C6] text-xl leading-relaxed">
+            Mission control
+            for a luxury
+            language voyage
+            platform.
+            Manage guides,
+            learners, ports,
+            voyages, and live
+            shores from one
+            immersive command
+            center.
           </p>
         </motion.div>
       </div>
 
+      {/* ================= LOGIN PANEL ================= */}
+
       <div className="flex items-center justify-center p-6 lg:p-12">
         <motion.form
-          onSubmit={onSubmit}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="ts-card p-8 w-full max-w-md"
+          onSubmit={
+            onSubmit
+          }
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.5,
+          }}
+          className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#102445]/90 backdrop-blur-xl p-10 shadow-2xl"
         >
-          <div className="text-[10px] uppercase tracking-[0.3em] text-gold mb-2">Control Tower</div>
-          <h2 className="font-display text-3xl mb-1">Admin sign-in</h2>
-          <p className="text-sm text-muted-foreground mb-8">Authorized personnel only.</p>
+          {/* LABEL */}
 
-          <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2">Email</label>
+          <div className="text-[11px] uppercase tracking-[0.35em] text-[#E8A548] mb-3">
+            CONTROL TOWER
+          </div>
+
+          {/* TITLE */}
+
+          <h2 className="font-serif text-4xl text-[#F5EFE6] mb-2">
+            Admin sign-in
+          </h2>
+
+          {/* SUBTITLE */}
+
+          <p className="text-sm text-[#8FA7C6] mb-10">
+            Authorized
+            personnel only.
+          </p>
+
+          {/* EMAIL */}
+
+          <label className="block text-xs uppercase tracking-[0.25em] text-[#8FA7C6] mb-3">
+            Email
+          </label>
+
           <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-11 rounded-xl bg-elevated border border-border px-4 mb-5 focus:outline-none focus:ring-2 focus:ring-ring"
+            type="email"
+            required
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
             placeholder="admin@talkshore.com"
+            className="w-full h-12 rounded-2xl border border-white/10 bg-[#14284D] px-5 text-[#F5EFE6] outline-none transition focus:border-[#E8A548] mb-6"
           />
-          <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-2">Password</label>
+
+          {/* PASSWORD */}
+
+          <label className="block text-xs uppercase tracking-[0.25em] text-[#8FA7C6] mb-3">
+            Password
+          </label>
+
           <input
-            type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-11 rounded-xl bg-elevated border border-border px-4 mb-6 focus:outline-none focus:ring-2 focus:ring-ring"
+            type="password"
+            required
+            value={
+              password
+            }
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
             placeholder="••••••••"
+            className="w-full h-12 rounded-2xl border border-white/10 bg-[#14284D] px-5 text-[#F5EFE6] outline-none transition focus:border-[#E8A548] mb-8"
           />
+
+          {/* BUTTON */}
+
           <button
-            type="submit" disabled={loading}
-            className="w-full h-11 rounded-xl bg-gradient-to-r from-gold to-gold-hover text-[oklch(0.18_0.04_255)] font-semibold flex items-center justify-center gap-2 hover:brightness-110 transition disabled:opacity-60"
+            type="submit"
+            disabled={
+              loading
+            }
+            className="w-full h-12 rounded-full bg-[#E8A548] text-[#06152D] font-semibold flex items-center justify-center gap-2 transition hover:translate-y-[-2px] hover:bg-[#F2B357] disabled:opacity-60"
           >
-            {loading && <Loader2 className="size-4 animate-spin" />}
+            {loading && (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            )}
+
             Board the bridge
           </button>
-          <p className="mt-6 text-xs text-muted-foreground text-center">
-            Access is gated by your role in <code className="text-gold">user_roles</code>.
-          </p>
+
+          {/* FOOTER */}
+
+          <div className="mt-10 flex items-center justify-center">
+            <div className="h-px w-full bg-white/5" />
+
+            <span className="px-4 text-[10px] uppercase tracking-[0.35em] text-[#8FA7C6] whitespace-nowrap">
+              TalkShore Control Tower
+            </span>
+
+            <div className="h-px w-full bg-white/5" />
+          </div>
         </motion.form>
       </div>
     </div>

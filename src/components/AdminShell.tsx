@@ -1,8 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Compass, Waves, MapPin, Video, UserCog,
-  Languages as LangIcon, BookOpen, Users, Flag, BarChart3, Settings, Anchor, LogOut, Bell, Search,
+  LayoutDashboard,
+  Compass,
+  Waves,
+  MapPin,
+  Video,
+  UserCog,
+  Languages as LangIcon,
+  BookOpen,
+  Users,
+  Flag,
+  BarChart3,
+  Settings,
+  Anchor,
+  LogOut,
+  Bell,
+  Search,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import type { ReactNode } from "react";
@@ -36,14 +50,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
           <div>
             <div className="font-display text-lg leading-tight">TalkShore</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Control Tower</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Control Tower
+            </div>
           </div>
         </div>
 
         <nav className="mt-2 flex-1 space-y-0.5">
           {nav.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.to || pathname.startsWith(item.to + "/");
+            const active =
+              pathname === item.to || pathname.startsWith(item.to + "/");
             return (
               <Link
                 key={item.to}
@@ -73,9 +90,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs truncate">{user?.email}</div>
-            <div className="text-[10px] uppercase tracking-wider text-gold">{role ?? "member"}</div>
+            <div className="text-[10px] uppercase tracking-wider text-gold">
+              {role ?? "member"}
+            </div>
           </div>
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition" aria-label="Sign out">
+          <button
+            onClick={signOut}
+            className="text-muted-foreground hover:text-foreground transition"
+            aria-label="Sign out"
+          >
             <LogOut className="size-4" />
           </button>
         </div>

@@ -1,8 +1,9 @@
 node_modules
 dist
-.output
-.vinxi
-pnpm-lock.yaml
+build
+coverage
+.next
+.vercel
 package-lock.json
-bun.lock
-routeTree.gen.ts
+pnpm-lock.yaml
+yarn.lock

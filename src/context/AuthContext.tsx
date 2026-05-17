@@ -1,86 +1,193 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+
 import type { Session, User } from "@supabase/supabase-js";
+
 import { supabase } from "@/lib/supabase";
 
-export type AdminRole = "admin" | "moderator" | null;
+/* ================= TYPES ================= */
+
+export type AdminRole = "admin" | "moderator" | "guide" | "learner" | null;
+
+interface Profile {
+  id: string;
+
+  full_name?: string;
+
+  email?: string;
+
+  role?: AdminRole;
+}
 
 interface AuthState {
   user: User | null;
+
   session: Session | null;
+
+  profile: Profile | null;
+
   role: AdminRole;
+
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+
+  isAdmin: boolean;
+
+  isModerator: boolean;
+
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{
+    error: string | null;
+  }>;
+
   signOut: () => Promise<void>;
 }
 
+/* ================= CONTEXT ================= */
+
 const AuthCtx = createContext<AuthState | undefined>(undefined);
 
-async function fetchRole(userId: string): Promise<AdminRole> {
-  // Try common shapes: user_roles(user_id, role)
+/* ================= FETCH PROFILE ================= */
+
+async function fetchProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  if (error || !data) return null;
-  const roles = data.map((r: { role: string }) => r.role);
-  if (roles.includes("admin")) return "admin";
-  if (roles.includes("moderator")) return "moderator";
-  return null;
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error || !data) {
+    console.error("Profile fetch failed:", error);
+
+    return null;
+  }
+
+  return data;
 }
+
+/* ================= PROVIDER ================= */
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+
   const [session, setSession] = useState<Session | null>(null);
+
+  const [profile, setProfile] = useState<Profile | null>(null);
+
   const [role, setRole] = useState<AdminRole>(null);
+
   const [loading, setLoading] = useState(true);
 
+  /* ================= LOAD SESSION ================= */
+
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        setTimeout(() => {
-          fetchRole(s.user.id).then(setRole);
-        }, 0);
-      } else {
+    const loadUser = async (currentSession: Session | null) => {
+      if (!currentSession?.user) {
+        setUser(null);
+
+        setSession(null);
+
+        setProfile(null);
+
         setRole(null);
-      }
-    });
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) {
-        fetchRole(data.session.user.id).then((r) => {
-          setRole(r);
-          setLoading(false);
-        });
-      } else {
         setLoading(false);
+
+        return;
       }
+
+      setUser(currentSession.user);
+
+      setSession(currentSession);
+
+      const profileData = await fetchProfile(currentSession.user.id);
+
+      setProfile(profileData);
+
+      setRole(profileData?.role ?? null);
+
+      setLoading(false);
+    };
+
+    /* ================= SESSION LISTENER ================= */
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
+      await loadUser(currentSession);
     });
 
-    return () => sub.subscription.unsubscribe();
+    /* ================= INITIAL SESSION ================= */
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      await loadUser(data.session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
+  /* ================= SIGN IN ================= */
+
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    return {
+      error: error?.message ?? null,
+    };
   };
+
+  /* ================= SIGN OUT ================= */
 
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
+  /* ================= ROLE HELPERS ================= */
+
+  const isAdmin = role === "admin";
+
+  const isModerator = role === "moderator";
+
+  /* ================= PROVIDER ================= */
+
   return (
-    <AuthCtx.Provider value={{ user, session, role, loading, signIn, signOut }}>
+    <AuthCtx.Provider
+      value={{
+        user,
+        session,
+        profile,
+        role,
+        loading,
+        isAdmin,
+        isModerator,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </AuthCtx.Provider>
   );
 }
 
+/* ================= HOOK ================= */
+
 export function useAuth() {
-  const ctx = useContext(AuthCtx);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  const context = useContext(AuthCtx);
+
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+
+  return context;
 }
