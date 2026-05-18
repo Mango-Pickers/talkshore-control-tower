@@ -34,7 +34,6 @@ function LoginPage() {
   const {
     signIn,
     user,
-    role,
     loading:
       authLoading,
   } = useAuth();
@@ -54,6 +53,12 @@ function LoginPage() {
     loading,
     setLoading,
   ] = useState(false);
+
+  /* ================= ROLE ================= */
+
+  const role =
+    user?.user_metadata
+      ?.role ?? null;
 
   /* ================= REDIRECT ================= */
 
@@ -104,9 +109,27 @@ function LoginPage() {
       toast.success(
         "Welcome Aboard."
       );
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      toast.error(
+        "Something went wrong."
+      );
     } finally {
       setLoading(false);
     }
+  }
+
+  /* ================= LOADING ================= */
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#06152D] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#E8A548]" />
+      </div>
+    );
   }
 
   /* ================= UI ================= */
