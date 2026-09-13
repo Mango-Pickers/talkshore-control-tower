@@ -1,20 +1,10 @@
-import {
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { motion } from "framer-motion";
 
-import {
-  Anchor,
-  Loader2,
-} from "lucide-react";
+import { Anchor, Loader2 } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -22,107 +12,69 @@ import { useAuth } from "@/context/AuthContext";
 
 /* ================= ROUTE ================= */
 
-export const Route =
-  createFileRoute("/login")({
-    component:
-      LoginPage,
-  });
+export const Route = createFileRoute("/login")({
+  component: LoginPage,
+});
 
 /* ================= PAGE ================= */
 
 function LoginPage() {
-  const {
-    signIn,
-    user,
-    loading:
-      authLoading,
-  } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
-  /* ================= ROLE ================= */
-
-  const role =
-    user?.user_metadata
-      ?.role ?? null;
+  const [loading, setLoading] = useState(false);
 
   /* ================= REDIRECT ================= */
 
   useEffect(() => {
-    if (
-      !authLoading &&
-      user &&
-      (role ===
-        "admin" ||
-        role ===
-          "moderator")
-    ) {
+    if (authLoading) {
+      return;
+    }
+
+    if (user) {
       navigate({
         to: "/dashboard",
+        replace: true,
       });
     }
-  }, [
-    authLoading,
-    user,
-    role,
-    navigate,
-  ]);
+  }, [authLoading, user, navigate]);
 
-  /* ================= SUBMIT ================= */
+  /* ================= LOGIN ================= */
 
-  async function onSubmit(
-    e: FormEvent
-  ) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
 
     try {
       setLoading(true);
 
-      const { error } =
-        await signIn(
-          email,
-          password
-        );
+      const { error } = await signIn(email.trim(), password);
 
       if (error) {
-        toast.error(
-          error
-        );
+        toast.error(error);
 
         return;
       }
 
-      toast.success(
-        "Welcome Aboard."
-      );
-    } catch (error) {
-      console.error(
-        error
-      );
+      toast.success("Welcome aboard.");
+    } catch (err) {
+      console.error(err);
 
-      toast.error(
-        "Something went wrong."
-      );
+      toast.error("Unable to sign in.");
     } finally {
       setLoading(false);
     }
   }
 
-  /* ================= LOADING ================= */
+  /* ================= AUTH LOADER ================= */
 
   if (authLoading) {
     return (
@@ -136,14 +88,10 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#06152D] grid lg:grid-cols-2">
-      {/* ================= LEFT PANEL ================= */}
+      {/* LEFT PANEL */}
 
       <div className="hidden lg:flex relative overflow-hidden items-center justify-center p-14">
-        {/* BACKGROUND */}
-
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(232,165,72,0.10)_0%,transparent_40%),radial-gradient(circle_at_80%_80%,rgba(59,130,246,0.14)_0%,transparent_50%)]" />
-
-        {/* CONTENT */}
 
         <motion.div
           initial={{
@@ -159,45 +107,28 @@ function LoginPage() {
           }}
           className="relative z-10 max-w-xl"
         >
-          {/* ICON */}
-
           <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#E8A548] to-[#F2B357] flex items-center justify-center shadow-2xl mb-10">
             <Anchor className="w-8 h-8 text-[#06152D]" />
           </div>
 
-          {/* HEADING */}
-
           <h1 className="font-serif text-6xl leading-tight text-[#F5EFE6] mb-6">
             The bridge of{" "}
-            <span className="italic text-[#E8A548]">
-              TalkShore
-            </span>
+            <span className="italic text-[#E8A548]">TalkShore</span>
           </h1>
 
-          {/* DESCRIPTION */}
-
           <p className="text-[#8FA7C6] text-xl leading-relaxed">
-            Mission control
-            for a luxury
-            language voyage
-            platform.
-            Manage guides,
-            learners, ports,
-            voyages, and live
-            shores from one
-            immersive command
-            center.
+            Mission control for a luxury language voyage platform. Manage
+            guides, learners, ports, voyages, and live shores from one immersive
+            command center.
           </p>
         </motion.div>
       </div>
 
-      {/* ================= LOGIN PANEL ================= */}
+      {/* RIGHT PANEL */}
 
       <div className="flex items-center justify-center p-6 lg:p-12">
         <motion.form
-          onSubmit={
-            onSubmit
-          }
+          onSubmit={onSubmit}
           initial={{
             opacity: 0,
             y: 20,
@@ -211,23 +142,16 @@ function LoginPage() {
           }}
           className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#102445]/90 backdrop-blur-xl p-10 shadow-2xl"
         >
-          {/* LABEL */}
-
           <div className="text-[11px] uppercase tracking-[0.35em] text-[#E8A548] mb-3">
             CONTROL TOWER
           </div>
-
-          {/* TITLE */}
 
           <h2 className="font-serif text-4xl text-[#F5EFE6] mb-2">
             Admin sign-in
           </h2>
 
-          {/* SUBTITLE */}
-
           <p className="text-sm text-[#8FA7C6] mb-10">
-            Authorized
-            personnel only.
+            Authorized personnel only.
           </p>
 
           {/* EMAIL */}
@@ -239,12 +163,9 @@ function LoginPage() {
           <input
             type="email"
             required
+            autoComplete="email"
             value={email}
-            onChange={(e) =>
-              setEmail(
-                e.target.value
-              )
-            }
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="admin@talkshore.com"
             className="w-full h-12 rounded-2xl border border-white/10 bg-[#14284D] px-5 text-[#F5EFE6] outline-none transition focus:border-[#E8A548] mb-6"
           />
@@ -258,14 +179,9 @@ function LoginPage() {
           <input
             type="password"
             required
-            value={
-              password
-            }
-            onChange={(e) =>
-              setPassword(
-                e.target.value
-              )
-            }
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             className="w-full h-12 rounded-2xl border border-white/10 bg-[#14284D] px-5 text-[#F5EFE6] outline-none transition focus:border-[#E8A548] mb-8"
           />
@@ -274,15 +190,10 @@ function LoginPage() {
 
           <button
             type="submit"
-            disabled={
-              loading
-            }
+            disabled={loading}
             className="w-full h-12 rounded-full bg-[#E8A548] text-[#06152D] font-semibold flex items-center justify-center gap-2 transition hover:translate-y-[-2px] hover:bg-[#F2B357] disabled:opacity-60"
           >
-            {loading && (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            )}
-
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             Board the bridge
           </button>
 

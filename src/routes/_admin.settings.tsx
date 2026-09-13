@@ -33,7 +33,7 @@ function Settings() {
             <div className="flex justify-between">
               <dt className="text-muted-foreground">User ID</dt>
               <dd>
-                <code className="text-xs">{user?.id.slice(0, 12)}…</code>
+                <code className="text-xs">{user?.uid.slice(0, 12)}…</code>
               </dd>
             </div>
           </dl>
@@ -43,15 +43,15 @@ function Settings() {
           <h3 className="font-display text-xl mb-4">Platform</h3>
           <dl className="text-sm space-y-3">
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Supabase project</dt>
+              <dt className="text-muted-foreground">Firebase project</dt>
               <dd>
-                <code className="text-xs text-gold">xgoehmaxmavvujjasmvr</code>
+                <code className="text-xs text-gold">talkshore-voyage</code>
               </dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Storage buckets</dt>
               <dd className="text-xs">
-                lesson-videos · lesson-thumbnails · guide-avatars
+                Firebase Storage (shared with TalkShore Voyage)
               </dd>
             </div>
             <div className="flex justify-between">

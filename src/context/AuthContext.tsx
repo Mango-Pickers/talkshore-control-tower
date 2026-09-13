@@ -5,172 +5,91 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-import type { Session, User } from "@supabase/supabase-js";
-
-import { supabase } from "@/lib/supabase";
-
-/* ================= TYPES ================= */
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  type User,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 export type AdminRole = "admin" | "moderator" | "guide" | "learner" | null;
-
 interface Profile {
   id: string;
-
   full_name?: string;
-
   email?: string;
-
   role?: AdminRole;
 }
-
 interface AuthState {
   user: User | null;
-
-  session: Session | null;
-
+  session: User | null;
   profile: Profile | null;
-
   role: AdminRole;
-
   loading: boolean;
-
   isAdmin: boolean;
-
   isModerator: boolean;
-
   signIn: (
     email: string,
     password: string
-  ) => Promise<{
-    error: string | null;
-  }>;
-
+  ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
-/* ================= CONTEXT ================= */
-
 const AuthCtx = createContext<AuthState | undefined>(undefined);
 
-/* ================= FETCH PROFILE ================= */
-
-async function fetchProfile(userId: string): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (error || !data) {
-    console.error("Profile fetch failed:", error);
-
-    return null;
-  }
-
-  return data;
+async function fetchProfile(user: User): Promise<Profile | null> {
+  const snapshot = await getDoc(doc(db, "profiles", user.uid));
+  return snapshot.exists()
+    ? ({ id: snapshot.id, ...snapshot.data() } as Profile)
+    : null;
 }
-
-/* ================= PROVIDER ================= */
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-
-  const [session, setSession] = useState<Session | null>(null);
-
   const [profile, setProfile] = useState<Profile | null>(null);
-
-  const [role, setRole] = useState<AdminRole>(null);
-
   const [loading, setLoading] = useState(true);
 
-  /* ================= LOAD SESSION ================= */
-
-  useEffect(() => {
-    const loadUser = async (currentSession: Session | null) => {
-      if (!currentSession?.user) {
-        setUser(null);
-
-        setSession(null);
-
-        setProfile(null);
-
-        setRole(null);
-
-        setLoading(false);
-
-        return;
-      }
-
-      setUser(currentSession.user);
-
-      setSession(currentSession);
-
-      const profileData = await fetchProfile(currentSession.user.id);
-
-      setProfile(profileData);
-
-      setRole(profileData?.role ?? null);
-
-      setLoading(false);
-    };
-
-    /* ================= SESSION LISTENER ================= */
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
-      await loadUser(currentSession);
-    });
-
-    /* ================= INITIAL SESSION ================= */
-
-    supabase.auth.getSession().then(async ({ data }) => {
-      await loadUser(data.session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  /* ================= SIGN IN ================= */
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, async (currentUser) => {
+        setLoading(true);
+        setUser(currentUser);
+        try {
+          setProfile(currentUser ? await fetchProfile(currentUser) : null);
+        } catch (error) {
+          console.error("Profile fetch failed:", error);
+          setProfile(null);
+        } finally {
+          setLoading(false);
+        }
+      }),
+    []
+  );
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    return {
-      error: error?.message ?? null,
-    };
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { error: null };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : "Unable to sign in",
+      };
+    }
   };
-
-  /* ================= SIGN OUT ================= */
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  /* ================= ROLE HELPERS ================= */
-
-  const isAdmin = role === "admin";
-
-  const isModerator = role === "moderator";
-
-  /* ================= PROVIDER ================= */
+  const signOut = () => firebaseSignOut(auth);
+  const role = profile?.role ?? null;
 
   return (
     <AuthCtx.Provider
       value={{
         user,
-        session,
+        session: user,
         profile,
         role,
         loading,
-        isAdmin,
-        isModerator,
+        isAdmin: role === "admin",
+        isModerator: role === "moderator",
         signIn,
         signOut,
       }}
@@ -180,14 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/* ================= HOOK ================= */
-
 export function useAuth() {
   const context = useContext(AuthCtx);
-
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }

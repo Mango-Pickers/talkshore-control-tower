@@ -3,7 +3,7 @@ import { useTable } from "@/hooks/useTable";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { createDocument, patchDocument } from "@/lib/firestore";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_admin/languages")({
@@ -22,10 +22,7 @@ function Languages() {
       name: string;
       flag?: string;
     }) => {
-      const { error } = await supabase
-        .from("languages")
-        .insert({ ...payload, active: true });
-      if (error) throw error;
+      await createDocument("languages", { ...payload, active: true });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["table", "languages"] });
@@ -36,11 +33,7 @@ function Languages() {
 
   const toggle = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      const { error } = await supabase
-        .from("languages")
-        .update({ active })
-        .eq("id", id);
-      if (error) throw error;
+      await patchDocument("languages", id, { active });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["table", "languages"] }),
   });

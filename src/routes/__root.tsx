@@ -2,11 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   createRootRouteWithContext,
-  HeadContent,
-  Scripts,
   Link,
 } from "@tanstack/react-router";
-import appCss from "../styles.css?url";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "sonner";
 
@@ -47,9 +44,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:card", content: "summary_large_image" },
         { property: "og:type", content: "website" },
       ],
-      links: [{ rel: "stylesheet", href: appCss }],
     }),
-    shellComponent: RootShell,
     component: RootComponent,
     notFoundComponent: () => (
       <div className="min-h-screen grid place-items-center text-center p-6">
@@ -67,20 +62,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ),
   }
 );
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" className="dark">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

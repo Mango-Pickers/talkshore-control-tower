@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { listDocuments, patchDocument } from "@/lib/firestore";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 import { BadgeCheck, Ban, Shield } from "lucide-react";
@@ -13,12 +13,10 @@ function Guides() {
   const { data, isLoading } = useQuery({
     queryKey: ["guides"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("role", "guide")
-        .order("created_at", { ascending: false });
-      return data ?? [];
+      return listDocuments("profiles", {
+        filter: { field: "role", value: "guide" },
+        order: { field: "created_at", direction: "desc" },
+      });
     },
   });
 
@@ -30,11 +28,7 @@ function Guides() {
       id: string;
       patch: Record<string, unknown>;
     }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update(patch)
-        .eq("id", id);
-      if (error) throw error;
+      await patchDocument("profiles", id, patch);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["guides"] });

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { listDocuments, subscribeToCollection } from "@/lib/firestore";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 
@@ -19,28 +19,21 @@ function Shores() {
   const { data, isLoading } = useQuery({
     queryKey: ["sessions", tab],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("sessions")
-        .select("*")
-        .eq("status", tab)
-        .order("starts_at", { ascending: tab !== "completed" });
-      return data ?? [];
+      return listDocuments("sessions", {
+        filter: { field: "status", value: tab },
+        order: {
+          field: "starts_at",
+          direction: tab !== "completed" ? "asc" : "desc",
+        },
+      });
     },
   });
 
   // realtime
   useEffect(() => {
-    const ch = supabase
-      .channel("sessions-rt")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "sessions" },
-        () => qc.invalidateQueries({ queryKey: ["sessions"] })
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
+    return subscribeToCollection("sessions", () =>
+      qc.invalidateQueries({ queryKey: ["sessions"] })
+    );
   }, [qc]);
 
   return (

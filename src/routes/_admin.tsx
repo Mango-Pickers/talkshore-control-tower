@@ -8,8 +8,6 @@ import { AdminShell } from "@/components/AdminShell";
 
 import { useAuth } from "@/context/AuthContext";
 
-import { supabase } from "@/lib/supabase";
-
 /* ================= ROUTE ================= */
 
 export const Route = createFileRoute("/_admin")({
@@ -82,8 +80,11 @@ function AdminLayout() {
           <p className="text-center text-[#8FA7C6] leading-relaxed mb-8">
             Your account <span className="text-[#F5EFE6]">({user.email})</span>{" "}
             is not assigned an <span className="text-[#E8A548]">admin</span> or{" "}
-            <span className="text-[#E8A548]">moderator</span> role inside the{" "}
-            <code className="text-[#F5EFE6]">profiles</code> table.
+            <span className="text-[#E8A548]">moderator</span> role in Firestore.
+            Create document{" "}
+            <code className="text-[#F5EFE6]">profiles/{user.uid}</code> and set{" "}
+            <code className="text-[#F5EFE6]">role</code> to{" "}
+            <code className="text-[#E8A548]">admin</code>.
           </p>
 
           {/* SIGN OUT */}

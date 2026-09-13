@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { countDocuments, listDocuments } from "@/lib/firestore";
 import { PageHeader } from "@/components/PageHeader";
 import { useCount } from "@/hooks/useTable";
 import {
@@ -73,64 +73,45 @@ function Dashboard() {
   const guides = useQuery({
     queryKey: ["count-guides"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "guide");
-      return count ?? 0;
+      return countDocuments("profiles", { field: "role", value: "guide" });
     },
   });
   const verified = useQuery({
     queryKey: ["count-verified-guides"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("verified_guide", true);
-      return count ?? 0;
+      return countDocuments("profiles", {
+        field: "verified_guide",
+        value: true,
+      });
     },
   });
   const liveSessions = useQuery({
     queryKey: ["count-live-sessions"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("sessions")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "live");
-      return count ?? 0;
+      return countDocuments("sessions", { field: "status", value: "live" });
     },
   });
   const pendingReports = useQuery({
     queryKey: ["count-pending-reports"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("reports")
-        .select("*", { count: "exact", head: true })
-        .eq("resolved", false);
-      return count ?? 0;
+      return countDocuments("reports", { field: "resolved", value: false });
     },
   });
   const videos = useCount("videos");
   const lessons = useQuery({
     queryKey: ["count-active-lessons"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("lessons")
-        .select("*", { count: "exact", head: true })
-        .eq("published", true);
-      return count ?? 0;
+      return countDocuments("lessons", { field: "published", value: true });
     },
   });
 
   const recent = useQuery({
     queryKey: ["recent-profiles"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(6);
-      return data ?? [];
+      return listDocuments("profiles", {
+        order: { field: "created_at", direction: "desc" },
+        limit: 6,
+      });
     },
   });
 

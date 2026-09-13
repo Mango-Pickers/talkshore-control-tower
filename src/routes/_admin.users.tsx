@@ -3,7 +3,7 @@ import { useTable } from "@/hooks/useTable";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { patchDocument } from "@/lib/firestore";
 import { toast } from "sonner";
 import { Ban } from "lucide-react";
 
@@ -22,11 +22,7 @@ function Users() {
       id: string;
       patch: Record<string, unknown>;
     }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update(patch)
-        .eq("id", id);
-      if (error) throw error;
+      await patchDocument("profiles", id, patch);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["table", "profiles"] });

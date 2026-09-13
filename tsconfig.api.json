@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["api/**/*.ts", "server/**/*.ts", "scripts/**/*.ts"],
+  "compilerOptions": {
+    "allowImportingTsExtensions": false,
+    "types": ["node"],
+    "paths": {}
+  }
+}

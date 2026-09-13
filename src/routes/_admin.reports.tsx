@@ -3,7 +3,7 @@ import { useTable } from "@/hooks/useTable";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { patchDocument } from "@/lib/firestore";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
 
@@ -16,11 +16,7 @@ function Reports() {
   const qc = useQueryClient();
   const resolve = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("reports")
-        .update({ resolved: true })
-        .eq("id", id);
-      if (error) throw error;
+      await patchDocument("reports", id, { resolved: true });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["table", "reports"] });

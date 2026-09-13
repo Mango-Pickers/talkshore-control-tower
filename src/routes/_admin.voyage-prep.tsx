@@ -3,38 +3,57 @@ import { useTable } from "@/hooks/useTable";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable, Badge } from "@/components/DataTable";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { patchDocument } from "@/lib/firestore";
 import { toast } from "sonner";
+
+interface Lesson {
+  id: string;
+  title: string;
+  description?: string | null;
+  duration?: string | number | null;
+  order_index?: number;
+  published: boolean;
+}
+
+interface PublishVariables {
+  id: string;
+  published: boolean;
+  title: string;
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error
+    ? error.message
+    : "The lesson could not be updated.";
+}
 
 export const Route = createFileRoute("/_admin/voyage-prep")({
   component: VoyagePrep,
 });
 
 function VoyagePrep() {
-  const { data, isLoading } = useTable<any>("lessons", {
+  const lessons = useTable<Lesson>("lessons", {
     order: { column: "order_index", ascending: true },
   });
   const qc = useQueryClient();
+
   const togglePub = useMutation({
-    mutationFn: async ({
-      id,
-      published,
-    }: {
-      id: string;
-      published: boolean;
-    }) => {
-      const { error } = await supabase
-        .from("lessons")
-        .update({ published })
-        .eq("id", id);
-      if (error) throw error;
+    mutationFn: async ({ id, published }: PublishVariables) => {
+      await patchDocument("lessons", id, {
+        published,
+        updated_at: new Date().toISOString(),
+      });
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["table", "lessons"] });
-      toast.success("Lesson updated.");
+    onSuccess: async (_, variables) => {
+      await qc.invalidateQueries({ queryKey: ["table", "lessons"] });
+      toast.success(
+        `${variables.title} ${variables.published ? "published" : "moved to drafts"}.`
+      );
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (error: unknown) => toast.error(getErrorMessage(error)),
   });
+
+  const changingLessonId = togglePub.isPending ? togglePub.variables.id : null;
 
   return (
     <div>
@@ -44,17 +63,22 @@ function VoyagePrep() {
         description="Lessons that prepare learners before they sail."
       />
       <DataTable
-        rows={data}
-        loading={isLoading}
+        rows={lessons.data}
+        loading={lessons.isLoading}
+        empty={
+          lessons.isError
+            ? "Lessons could not be loaded. Refresh the page to try again."
+            : "No Voyage Prep lessons have been created yet."
+        }
         columns={[
           {
             key: "title",
             label: "Lesson",
-            render: (l: any) => (
+            render: (lesson) => (
               <div>
-                <div className="font-medium">{l.title}</div>
+                <div className="font-medium">{lesson.title}</div>
                 <div className="text-xs text-muted-foreground line-clamp-1">
-                  {l.description}
+                  {lesson.description || "No description provided."}
                 </div>
               </div>
             ),
@@ -62,13 +86,13 @@ function VoyagePrep() {
           {
             key: "duration",
             label: "Duration",
-            render: (l: any) => l.duration ?? "—",
+            render: (lesson) => lesson.duration ?? "—",
           },
           {
             key: "status",
             label: "Status",
-            render: (l: any) =>
-              l.published ? (
+            render: (lesson) =>
+              lesson.published ? (
                 <Badge tone="success">published</Badge>
               ) : (
                 <Badge tone="muted">draft</Badge>
@@ -77,16 +101,30 @@ function VoyagePrep() {
           {
             key: "act",
             label: "",
-            render: (l: any) => (
-              <button
-                onClick={() =>
-                  togglePub.mutate({ id: l.id, published: !l.published })
-                }
-                className="text-xs px-3 py-1.5 rounded-lg bg-gold/15 text-gold hover:bg-gold/25 transition"
-              >
-                {l.published ? "Unpublish" : "Publish"}
-              </button>
-            ),
+            render: (lesson) => {
+              const isChanging = changingLessonId === lesson.id;
+
+              return (
+                <button
+                  onClick={() =>
+                    togglePub.mutate({
+                      id: lesson.id,
+                      published: !lesson.published,
+                      title: lesson.title,
+                    })
+                  }
+                  disabled={togglePub.isPending}
+                  aria-label={`${lesson.published ? "Unpublish" : "Publish"} ${lesson.title}`}
+                  className="rounded-lg bg-gold/15 px-3 py-1.5 text-xs text-gold transition hover:bg-gold/25 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isChanging
+                    ? "Updating…"
+                    : lesson.published
+                      ? "Unpublish"
+                      : "Publish"}
+                </button>
+              );
+            },
             className: "text-right",
           },
         ]}
