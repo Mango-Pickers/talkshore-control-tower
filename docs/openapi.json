@@ -24,8 +24,12 @@
   ],
   "servers": [
     {
-      "url": "/api",
-      "description": "Current deployment"
+      "url": "https://talkshore-control-tower-indol.vercel.app",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Vercel development"
     }
   ],
   "components": {

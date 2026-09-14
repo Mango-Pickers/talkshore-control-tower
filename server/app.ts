@@ -507,7 +507,13 @@ app.doc("/openapi.json", {
       description: "The authenticated user's TalkShore profile.",
     },
   ],
-  servers: [{ url: "/api", description: "Current deployment" }],
+  servers: [
+    {
+      url: "https://talkshore-control-tower-indol.vercel.app",
+      description: "Production",
+    },
+    { url: "http://localhost:3000", description: "Local Vercel development" },
+  ],
 });
 app.get("/docs", swaggerUI({ url: "/api/openapi.json" }));
 app.get("/", (c) => c.redirect("/api/docs"));
