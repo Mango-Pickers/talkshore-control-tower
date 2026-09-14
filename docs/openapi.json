@@ -117,11 +117,30 @@
           "updated_at"
         ]
       },
-      "ProfileResponse": {
+      "RegistrationResponse": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/Profile"
+            "type": "object",
+            "properties": {
+              "profile": {
+                "$ref": "#/components/schemas/Profile"
+              },
+              "custom_token": {
+                "type": "string"
+              },
+              "token_type": {
+                "type": "string",
+                "enum": [
+                  "firebase_custom_token"
+                ]
+              }
+            },
+            "required": [
+              "profile",
+              "custom_token",
+              "token_type"
+            ]
           }
         },
         "required": [
@@ -156,6 +175,55 @@
         },
         "required": [
           "error"
+        ]
+      },
+      "RegistrationInput": {
+        "type": "object",
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "Ada Mensah"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "example": "ada@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "example": "strong-password"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "learner",
+              "guide"
+            ],
+            "example": "learner"
+          }
+        },
+        "required": [
+          "full_name",
+          "email",
+          "password",
+          "role"
+        ],
+        "additionalProperties": false
+      },
+      "ProfileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Profile"
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "ProfileInput": {
@@ -271,6 +339,69 @@
                   "required": [
                     "data"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a learner or guide",
+        "description": "Creates a Firebase Authentication user and matching TalkShore profile. Guides are created with verified_guide set to false.",
+        "operationId": "registerUser",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An account already exists for this email address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Registration details are invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Firebase Admin is not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
